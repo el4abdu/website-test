@@ -1,5 +1,8 @@
 // Wait for the DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
+    // Define the API URL
+    const API_URL = "https://app-test-rojhj.kinsta.app";
+
     // Mobile Navigation Toggle
     const menuBtn = document.querySelector('.menu-btn');
     const nav = document.querySelector('.nav');
@@ -102,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const contactForm = document.getElementById('contactForm');
     
     if (contactForm) {
-        contactForm.addEventListener('submit', function(e) {
+        contactForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
             // Get form values
@@ -116,14 +119,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Here you would typically send the data to a server
-            console.log('Form submitted', { name, email, message });
-            
-            // Show success message (in a real app, do this after server confirms)
-            alert('Thank you for your message! We will get back to you soon.');
-            
-            // Reset form
-            contactForm.reset();
+            try {
+                // Send data to server
+                const response = await fetch(`${API_URL}/api/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, email, message }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Thank you for your message! We will get back to you soon.');
+                    contactForm.reset();
+                } else {
+                    alert(`Error: ${data.error || 'Something went wrong. Please try again.'}`);
+                }
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                alert('Failed to submit the form. Please try again later.');
+            }
         });
     }
     
@@ -131,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const newsletterForm = document.getElementById('newsletterForm');
     
     if (newsletterForm) {
-        newsletterForm.addEventListener('submit', function(e) {
+        newsletterForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
             // Get email value
@@ -143,14 +160,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Here you would typically send the data to a server
-            console.log('Newsletter subscription', { email });
-            
-            // Show success message
-            alert('Thank you for subscribing to our newsletter!');
-            
-            // Reset form
-            newsletterForm.reset();
+            try {
+                // Send data to server
+                const response = await fetch(`${API_URL}/api/subscribe`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Thank you for subscribing to our newsletter!');
+                    newsletterForm.reset();
+                } else {
+                    alert(`Error: ${data.error || 'Something went wrong. Please try again.'}`);
+                }
+            } catch (error) {
+                console.error('Error subscribing:', error);
+                alert('Failed to subscribe. Please try again later.');
+            }
         });
     }
     
@@ -172,17 +203,30 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('scroll', revealOnScroll);
     revealOnScroll(); // Check on initial load
     
-    // Connect to Python App Feature (mock functionality)
+    // Connect to Python App Feature (updated functionality)
     const downloadBtn = document.querySelector('.btn-download');
     
     if (downloadBtn) {
         downloadBtn.addEventListener('click', function(e) {
-            // Here we're just showing a message, but in a real app
-            // you might initiate a download or redirect to a download page
+            // Update the href to point to the app's download URL
+            window.location.href = `${API_URL}/app_connect.py`;
             console.log('User clicked the download button');
-            
-            // Optional: Show download started message
-            alert('Your download has started!');
         });
     }
+    
+    // Check API status on page load
+    async function checkApiStatus() {
+        try {
+            const response = await fetch(`${API_URL}/api/status`);
+            const data = await response.json();
+            console.log('API Status:', data);
+            
+            // You could display a status indicator on the page if needed
+        } catch (error) {
+            console.error('API Status Check Failed:', error);
+        }
+    }
+    
+    // Run the API status check
+    checkApiStatus();
 }); 
